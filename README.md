@@ -1,0 +1,2 @@
+# inventory-server
+inventory-server
