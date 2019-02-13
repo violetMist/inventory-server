@@ -19,8 +19,6 @@ class InStore {
 		} else {
 			this.version = ''
 			this.brand = ''
-			this.commercial = ''
-			this.store = ''
 			this.number = ''
 			this.price = ''
 			this.total = 0

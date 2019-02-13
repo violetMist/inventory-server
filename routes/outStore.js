@@ -31,7 +31,9 @@ router.get('/getList', (req, res, next) => {
 		path: 'store'
 	}, {
 		path: 'user'
-	}]).then(r => {
+	}]).sort({
+		'outTime': -1
+	}).then(r => {
 		let arr = r.map(c => {
 			return new OutStore(c)
 		}).filter(c => {

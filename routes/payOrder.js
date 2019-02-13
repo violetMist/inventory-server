@@ -8,6 +8,8 @@ var Inventory = require('../models/Inventory.js')
 var InventoryModel = require('../db/modules/inventory.js')
 
 function filterFn(query, c) {
+	if (query.commercial && query.commercial != c.commercial)
+		return false
 	if (query.user && query.user != c.user)
 		return false
 	if (query.begin && query.end && (c.inTime < query.begin || c.inTime >= query.end))
@@ -17,6 +19,10 @@ function filterFn(query, c) {
 
 const getOrder = async (query, res) => {
 	return await PayOrderModel.findById(query.id).populate([{
+		path: 'store'
+	}, {
+		path: 'commercial'
+	}, {
 		path: 'user'
 	}]).catch(err => {
 		console.log(err);
@@ -50,6 +56,8 @@ const getList = async (payOrder, res) => {
 const insertInStore = async (data, res) => {
 	let arr = data.list.map(r => {
 		return Object.assign({}, r, {
+			commercial: data.commercial,
+			store: data.store,
 			user: data.user,
 			inTime: data.inTime
 		})
@@ -91,7 +99,13 @@ const delInStore = async (list, res) => {
 
 router.get('/getList', (req, res, next) => {
 	var query = req.query
-	PayOrderModel.find({}).populate([{
+	PayOrderModel.find({}).sort({
+		'inTime': -1
+	}).populate([{
+		path: 'store'
+	}, {
+		path: 'commercial'
+	}, {
 		path: 'user'
 	}]).then(r => {
 		let arr = r.map(c => {
@@ -165,10 +179,6 @@ router.post('/edit', async (req, res, next) => {
 	if (!isOK)
 		return res.ef('入库单修改失败')
 	res.sf({}, '入库单修改成功')
-})
-
-router.post('/delete', (req, res, next) => {
-
 })
 
 module.exports = router

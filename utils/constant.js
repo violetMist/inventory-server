@@ -80,7 +80,7 @@ const constant = {
 			roles: []
 		}, {
 			id: 63,
-			label: '出库编辑',
+			label: '出库删除',
 			roles: []
 		}]
 	}, {
@@ -143,6 +143,76 @@ const constant = {
 	}, {
 		key: '9',
 		value: '推力调心滚子轴承'
+	}, {
+		key: '10',
+		value: '带座外球面轴承'
+	}, {
+		key: '11',
+		value: '外球面球轴承'
+	}, {
+		key: '12',
+		value: '外球面轴承座'
+	}, {
+		key: '13',
+		value: '剖分式轴承座'
+	}, {
+		key: '14',
+		value: '铸钢类轴承座'
+	}, {
+		key: '15',
+		value: '进口轴承'
+	}, {
+		key: '16',
+		value: '关节轴承'
+	}, {
+		key: '17',
+		value: '直线轴承'
+	}, {
+		key: '18',
+		value: '塑料轴承'
+	}, {
+		key: '19',
+		value: '自润滑轴承'
+	}, {
+		key: '20',
+		value: '不锈钢轴承'
+	}, {
+		key: '21',
+		value: '丝杠类轴承'
+	}, {
+		key: '22',
+		value: '导轨类轴承'
+	}, {
+		key: '23',
+		value: '回转支撑类轴承'
+	}, {
+		key: '24',
+		value: '耐高温/耐低温轴承'
+	}, {
+		key: '25',
+		value: '特殊类型轴承'
+	}, {
+		key: '26',
+		value: '紧定套'
+	}, {
+		key: '27',
+		value: '油封'
+	}, {
+		key: '28',
+		value: '润滑脂'
+	}],
+	unitType: [{
+		key: '1',
+		value: '个'
+	}, {
+		key: '2',
+		value: '套'
+	}, {
+		key: '3',
+		value: '根'
+	}, {
+		key: '4',
+		value: '米'
 	}],
 	commercialType: [{
 		key: '1',

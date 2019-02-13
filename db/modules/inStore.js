@@ -8,12 +8,10 @@ var InStoreSchema = new Schema({
 		required: true
 	},
 	price: { //单价
-		type: Number,
-		required: true
+		type: Number
 	},
 	total: {
-		type: String,
-		required: true
+		type: String
 	},
 	inTime: { //入库时间
 		type: Date,

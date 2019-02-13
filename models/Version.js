@@ -9,6 +9,7 @@ class Version {
 			this.outsideDiameter = version.outsideDiameter
 			this.width = version.width
 			this.weight = version.weight
+			this.unit = version.unit
 		} else {
 			this.type = ''
 			this.name = ''
@@ -17,6 +18,7 @@ class Version {
 			this.outsideDiameter = ''
 			this.width = ''
 			this.weight = ''
+			this.unit = ''
 		}
 	}
 }

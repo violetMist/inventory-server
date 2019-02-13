@@ -31,7 +31,9 @@ router.get('/getList', (req, res, next) => {
 		path: 'store'
 	}, {
 		path: 'user'
-	}]).then(r => {
+	}]).sort({
+		'inTime': -1
+	}).then(r => {
 		let arr = r.map(c => {
 			return new InStore(c)
 		}).filter(c => {

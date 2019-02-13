@@ -7,6 +7,8 @@ router.get('/getList', (req, res, next) => {
 	var query = req.query
 	VersionModel.find({
 		type: new RegExp(query.type)
+	}).sort({
+		'_id': -1
 	}).then(r => {
 		res.sf({
 			total: r.length,
@@ -62,7 +64,8 @@ router.post('/edit', (req, res, next) => {
 				innerDiameter: req.body.innerDiameter,
 				outsideDiameter: req.body.outsideDiameter,
 				width: req.body.width,
-				weight: req.body.weight
+				weight: req.body.weight,
+				unit: req.body.unit
 			}
 		}).then(r => {
 			res.sf({}, '型号编辑成功')

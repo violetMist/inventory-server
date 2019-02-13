@@ -7,7 +7,15 @@ var PayOrderSchema = new Schema({
 		type: Date,
 		required: true
 	},
-	user: { //接收人
+	store: { //仓库
+		type: Schema.Types.ObjectId,
+		ref: 'Store'
+	},
+	commercial: { //供应商
+		type: Schema.Types.ObjectId,
+		ref: 'Commercial'
+	},
+	user: { //填写人
 		type: Schema.Types.ObjectId,
 		ref: 'User'
 	},

@@ -1,11 +1,15 @@
 var express = require('express')
 var router = express.Router()
+var _ = require('lodash')
 var OutStore = require('../models/OutStore.js')
 var OutStoreModel = require('../db/modules/outStore.js')
 var SellOrder = require('../models/SellOrder.js')
 var SellOrderModel = require('../db/modules/sellOrder.js')
 var Inventory = require('../models/Inventory.js')
 var InventoryModel = require('../db/modules/inventory.js')
+var BrandModel = require('../db/modules/brand.js')
+var StoreModel = require('../db/modules/store.js')
+var VersionModel = require('../db/modules/version.js')
 
 function filterFn(query, c) {
 	if (query.commercial && query.commercial != c.commercial)
@@ -51,7 +55,7 @@ const getList = async (sellOrder, res) => {
 	})
 }
 
-const insertInStore = async (data, res) => {
+const insertOutStore = async (data, res) => {
 	let arr = data.list.map(r => {
 		return Object.assign({}, r, {
 			commercial: data.commercial,
@@ -94,9 +98,61 @@ const delInStore = async (list, res) => {
 	return isOK
 }
 
+const checkFn = async req => {
+	if (!req.body.list.length)
+		return {
+			status: 0,
+			message: '型号内容不能为空，出库单创建失败'
+		}
+	let arr = repetition(req.body.list)
+	let check = await InventoryModel.checkNumber(arr)
+	if (check.status == 0)
+		return {
+			status: 0,
+			message: '型号：' + check.data.version.name +
+				'，品牌：' + check.data.brand.name +
+				'，所在仓库：' + check.data.store.name +
+				'，数量为：' + check.data.number + '，库存数量不足，请重新填写'
+		}
+	if (check.status == -1) {
+		let brand = await BrandModel.findById(check.data.brand)
+		let version = await VersionModel.findById(check.data.version)
+		let store = await StoreModel.findById(check.data.store)
+		return {
+			status: 0,
+			message: '库存中没有型号：' + version.name +
+				'，品牌：' + brand.name +
+				'，所在仓库：' + store.name + ', 的轴承，请重新填写'
+		}
+	}
+	return {
+		status: 1,
+		message: ''
+	}
+}
+
+const repetition = list => {
+	let obj = {}
+	let arr = []
+	list.forEach((l, idx) => {
+		let c = _.clone(l)
+		let key = c.version + '-' + c.brand
+		if (obj[key]) {
+			obj[key].number += Number(c.number)
+		} else {
+			c.number = Number(c.number)
+			obj[key] = c
+			arr.push(obj[key])
+		}
+	})
+	return arr
+}
+
 router.get('/getList', (req, res, next) => {
 	var query = req.query
-	SellOrderModel.find({}).populate([{
+	SellOrderModel.find({}).sort({
+		'outTime': -1
+	}).populate([{
 		path: 'commercial'
 	}, {
 		path: 'user'
@@ -130,19 +186,11 @@ router.get('/view', async (req, res, next) => {
 })
 
 router.post('/add', async (req, res, next) => {
-	if (!req.body.list.length)
-		return res.ef('型号内容不能为空，出库单创建失败')
-	let check = await InventoryModel.checkNumber(req.body.list)
-	if (check.status == 0)
-		return res.ef('型号：' + check.data.version.name +
-			'，品牌：' + check.data.brand.name +
-			'，所在仓库：' + check.data.store.name +
-			'，的轴承库存数量为：' + check.data.number + '，库存数量不足，请重新填写')
-	if (check.status == -1) {
-		return res.ef('库存中没有所填的产品，出库单创建失败')
-	}
+	let result = await checkFn(req)
+	if (!result.status)
+		return res.ef(result.message)
 	//创建出库单详情
-	let list = await insertInStore(req.body, res)
+	let list = await insertOutStore(req.body, res)
 	if (!list.length) return
 	//创建出库单
 	let saveOK = await saveOrder(req.body, list, res)
@@ -154,37 +202,20 @@ router.post('/add', async (req, res, next) => {
 	res.sf({}, '出库单创建成功')
 })
 
-router.post('/edit', async (req, res, next) => {
-	if (!req.body.list.length)
-		return res.ef('型号内容不能为空，出库单修改失败')
+router.post('/delete', async (req, res, next) => {
 	let order = await getOrder(req.body, res)
 	let oldList = await getList(order, res)
 	//删除入库单
 	await order.remove()
-	//删除库存
-	let delInventory = await InventoryModel.del(oldList)
+	//添加库存
+	let delInventory = await InventoryModel.add(oldList)
 	if (!delInventory)
-		return res.ef('出库单修改失败')
+		return res.ef('出库单删除失败')
 	//删除出库单详情
 	let delStore = await delInStore(oldList)
 	if (!delStore)
-		return res.ef('出库单修改失败')
-
-	//创建出库单详情
-	let list = await insertInStore(req.body, res)
-	if (!list.length) return
-	//创建出库单
-	let saveOK = await saveOrder(req.body, list, res)
-	if (!saveOK) return
-	//更新库存
-	let isOK = InventoryModel.add(list, res)
-	if (!isOK)
-		return res.ef('入库单修改失败')
-	res.sf({}, '入库单修改成功')
-})
-
-router.post('/delete', (req, res, next) => {
-
+		return res.ef('出库单删除失败')
+	res.sf({}, '入库单删除成功')
 })
 
 module.exports = router

@@ -15,7 +15,9 @@ function filterFn(query, c) {
 
 router.get('/getList', (req, res, next) => {
 	var query = req.query
-	InventoryModel.find({}).populate([{
+	InventoryModel.find({}).sort({
+		'_id': -1
+	}).populate([{
 		path: 'version'
 	}, {
 		path: 'brand'

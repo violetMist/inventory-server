@@ -66,6 +66,8 @@ router.get('/getList', (req, res, next) => {
 			name: new RegExp(query.name),
 			account: new RegExp(query.account)
 		}]
+	}).sort({
+		'_id': -1
 	}).then(r => {
 		res.sf({
 			total: r.length,

@@ -8,18 +8,16 @@ var OutStoreSchema = new Schema({
 		required: true
 	},
 	price: { //单价
-		type: Number,
-		required: true
+		type: Number
 	},
 	total: { //金额
-		type: String,
-		required: true
+		type: String
 	},
 	outTime: { //出库时间
 		type: Date,
 		required: true
 	},
-	commercial: { //买家编号
+	commercial: { //买家
 		type: Schema.Types.ObjectId,
 		ref: 'Commercial'
 	},

@@ -11,14 +11,6 @@ var CommercialSchema = new Schema({
 		type: String,
 		required: true
 	},
-	contacts: {
-		type: String,
-		required: true
-	},
-	phone: {
-		type: Number,
-		required: true
-	},
 	address: {
 		type: String,
 		required: true
@@ -26,7 +18,11 @@ var CommercialSchema = new Schema({
 	enterTime: {
 		type: Date,
 		required: true
-	}
+	},
+	list: [{
+		type: Schema.Types.ObjectId,
+		ref: 'Contacts'
+	}]
 }, {
 	timestamps: true
 })

@@ -12,24 +12,22 @@ var VersionSchema = new Schema({
 		required: true
 	},
 	oldName: { //国内旧型号
-		type: String,
-		required: true
+		type: String
 	},
 	innerDiameter: { //内径
-		type: Number,
-		required: true
+		type: Number
 	},
 	outsideDiameter: { //外径
-		type: Number,
-		required: true
+		type: Number
 	},
 	width: { //宽度
-		type: Number,
-		required: true
+		type: Number
 	},
 	weight: { //重量
-		type: Number,
-		required: true
+		type: Number
+	},
+	unit: { //单位
+		type: String
 	}
 }, {
 	timestamps: true

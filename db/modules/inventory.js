@@ -35,7 +35,7 @@ InventorySchema.statics.add = async function(list) {
 			console.log(err);
 		})
 		if (!one) {
-			this.create(Object.assign({}, {
+			await this.create(Object.assign({}, {
 				version: l.version,
 				brand: l.brand,
 				store: l.store,
@@ -46,7 +46,7 @@ InventorySchema.statics.add = async function(list) {
 			})
 		} else {
 			one.number += l.number
-			one.save().catch(err => {
+			await one.save().catch(err => {
 				isOK = false
 				console.log(err);
 			})
@@ -70,7 +70,7 @@ InventorySchema.statics.del = async function(list) {
 			console.log(err);
 		})
 		one.number -= l.number
-		one.save().catch(err => {
+		await one.save().catch(err => {
 			isOK = false
 			console.log(err);
 		})
@@ -96,21 +96,25 @@ InventorySchema.statics.checkNumber = async function(list) {
 		}, {
 			path: 'store'
 		}]).catch(err => {
-			status = -1
+			status = -1 //没有库存
+			data = l
 			console.log(err);
 		})
 		if (!one) {
-			data = l
+			data = l //没有库存
 			return status = -1
 		}
 		if (one.number < l.number) {
-			data = one
+			data = one //库存量不足
 			return status = 0
 		}
 	}
 	for (var i = 0; i < list.length; i++) {
 		if (status != 1)
-			return
+			return {
+				status: status,
+				data: data
+			}
 		await checkFn(list[i])
 	}
 	return {
