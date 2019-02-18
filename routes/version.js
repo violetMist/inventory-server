@@ -5,14 +5,16 @@ var VersionModel = require('../db/modules/version.js')
 
 router.get('/getList', (req, res, next) => {
 	var query = req.query
-	VersionModel.find({
-		type: new RegExp(query.type)
-	}).sort({
+	VersionModel.find({}).sort({
 		'_id': -1
 	}).then(r => {
+		let arr = r.filter(c => {
+			return (!query.type || c.type == query.type)
+		})
+		let hasPage = query.pageNo && query.pageSize
 		res.sf({
-			total: r.length,
-			items: r.slice((query.pageNo - 1) * query.pageSize, query.pageNo * query.pageSize).map(c => {
+			total: arr.length,
+			items: (hasPage ? arr.slice((query.pageNo - 1) * query.pageSize, query.pageNo * query.pageSize) : arr).map(c => {
 				return new Version(c)
 			})
 		})

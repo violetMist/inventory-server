@@ -4,6 +4,8 @@ var Inventory = require('../models/Inventory.js')
 var InventoryModel = require('../db/modules/inventory.js')
 
 function filterFn(query, c) {
+	if (query.type && query.type != c.type)
+		return false
 	if (query.version && query.version != c.version)
 		return false
 	if (query.brand && query.brand != c.brand)

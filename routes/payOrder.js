@@ -4,7 +4,6 @@ var InStore = require('../models/InStore.js')
 var InStoreModel = require('../db/modules/inStore.js')
 var PayOrder = require('../models/PayOrder.js')
 var PayOrderModel = require('../db/modules/payOrder.js')
-var Inventory = require('../models/Inventory.js')
 var InventoryModel = require('../db/modules/inventory.js')
 
 function filterFn(query, c) {
