@@ -32,8 +32,13 @@ router.get('/getList', (req, res, next) => {
 		}).sort(function(a, b) {
 			let x = parseInt(a.versionName)
 			let y = parseInt(b.versionName)
-			if (_.isNaN(x) || _.isNaN(y))
-				return a.versionName > b.versionName
+			if (_.isNaN(x) || _.isNaN(y)) {
+				if (a.versionName > b.versionName)
+					return 1
+				if (a.versionName < b.versionName)
+					return -1
+				return 0
+			}
 			return x - y
 		})
 		res.sf({
