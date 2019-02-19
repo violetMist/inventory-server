@@ -1,5 +1,6 @@
 var express = require('express')
 var router = express.Router()
+var _ = require('lodash')
 var Inventory = require('../models/Inventory.js')
 var InventoryModel = require('../db/modules/inventory.js')
 
@@ -17,9 +18,7 @@ function filterFn(query, c) {
 
 router.get('/getList', (req, res, next) => {
 	var query = req.query
-	InventoryModel.find({}).sort({
-		'_id': -1
-	}).populate([{
+	InventoryModel.find({}).populate([{
 		path: 'version'
 	}, {
 		path: 'brand'
@@ -30,6 +29,12 @@ router.get('/getList', (req, res, next) => {
 			return new Inventory(c)
 		}).filter(c => {
 			return filterFn(query, c)
+		}).sort(function(a, b) {
+			let x = parseInt(a.versionName)
+			let y = parseInt(b.versionName)
+			if (_.isNaN(x) || _.isNaN(y))
+				return a.versionName > b.versionName
+			return x - y
 		})
 		res.sf({
 			total: arr.length,
@@ -37,6 +42,21 @@ router.get('/getList', (req, res, next) => {
 		})
 	}).catch(err => {
 		res.ef('获取库存列表失败')
+	})
+})
+
+router.get('/getNumber', (req, res, next) => {
+	var query = req.query
+	InventoryModel.find({
+		store: query.store,
+		version: query.version,
+		brand: query.brand
+	}).then(r => {
+		res.sf({
+			stock: r.length ? r[0].number : 0
+		})
+	}).catch(err => {
+		res.ef('获取库存数量失败')
 	})
 })
 
