@@ -123,24 +123,33 @@ router.post('/edit', async (req, res, next) => {
 	let r = await CommercialModel.findOne({
 		name: req.body.name
 	})
-	if (r.id != req.body.id)
+	if (r && r.id != req.body.id)
 		return res.ef('商户名已存在，请重新输入')
 	let commercial = await getCommercial(req.body, res)
 	let oldList = await getList(commercial, res)
-	//删除商户
-	await commercial.remove()
 	//删除联系人
 	let delStore = await delContacts(oldList)
 	if (!delStore)
 		return res.ef('商户修改失败')
-
 	//创建联系人
 	let list = await insertContacts(req.body, res)
 	if (!list.length) return
-	//创建商户
-	let saveOK = await saveCommercial(req.body, list, res)
-	if (!saveOK) return
-	res.sf({}, '商户编辑成功')
+
+	CommercialModel.updateOne({
+		_id: req.body.id
+	}, {
+		$set: {
+			name: req.body.name,
+			address: req.body.address,
+			enterTime: req.body.enterTime,
+			type: req.body.type,
+			list: list
+		}
+	}).then(r => {
+		res.sf({}, '商户编辑成功')
+	}).catch(err => {
+		return res.ef('商户不存在')
+	})
 })
 
 router.post('/delete', async (req, res, next) => {
