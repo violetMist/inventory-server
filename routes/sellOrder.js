@@ -246,7 +246,7 @@ router.post('/delete', async (req, res, next) => {
 	let delStore = await delInStore(oldList)
 	if (!delStore)
 		return res.ef('出库单删除失败')
-	res.sf({}, '入库单删除成功')
+	res.sf({}, '出库单删除成功')
 })
 
 module.exports = router

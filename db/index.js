@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 var UserModel = require('./modules/user.js')
 
 //🔗数据库
-mongoose.connect('mongodb://localhost:27017/db', {
+mongoose.connect('mongodb://47.75.81.230:27017/db', {
 	useNewUrlParser: true
 }, function(err) {
 	if (err)
@@ -12,13 +12,13 @@ mongoose.connect('mongodb://localhost:27017/db', {
 		console.dir('数据库🔗成功');
 		UserModel.findOne({
 			account: 'admin',
-			password: 123456,
+			password: 'Y13801454838e',
 		}).then(r => {
 			if (!r) {
 				var admin = new UserModel({
 					name: 'admin',
 					account: 'admin',
-					password: 123456,
+					password: 'Y13801454838e',
 					phone: 13801454838,
 					roles: [-1]
 				})
