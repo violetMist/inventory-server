@@ -80,7 +80,7 @@ const constant = {
 			roles: []
 		}, {
 			id: 63,
-			label: '出库删除',
+			label: '出库编辑',
 			roles: []
 		}]
 	}, {

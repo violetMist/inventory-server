@@ -6,6 +6,11 @@ var PayOrder = require('../models/PayOrder.js')
 var PayOrderModel = require('../db/modules/payOrder.js')
 var InventoryModel = require('../db/modules/inventory.js')
 
+var _ = require('lodash')
+var BrandModel = require('../db/modules/brand.js')
+var StoreModel = require('../db/modules/store.js')
+var VersionModel = require('../db/modules/version.js')
+
 function filterFn(query, c) {
 	if (query.commercial && query.commercial != c.commercial)
 		return false
@@ -96,6 +101,51 @@ const delInStore = async (list, res) => {
 	return isOK
 }
 
+const checkFn = async list => {
+	let arr = repetition(list)
+	let check = await InventoryModel.checkRepertory(arr)
+	if (check.status == 0)
+		return {
+			status: 0,
+			message: '型号：' + check.data.version.name +
+				'，品牌：' + check.data.brand.name +
+				'，所在仓库：' + check.data.store.name +
+				'，的轴承，已经有过出库记录，入库单不可编辑'
+		}
+	if (check.status == -1) {
+		let brand = await BrandModel.findById(check.data.brand)
+		let version = await VersionModel.findById(check.data.version)
+		let store = await StoreModel.findById(check.data.store)
+		return {
+			status: 0,
+			message: '库存中没有型号：' + version.name +
+				'，品牌：' + brand.name +
+				'，所在仓库：' + store.name + ', 的轴承，请重新填写'
+		}
+	}
+	return {
+		status: 1,
+		message: ''
+	}
+}
+
+const repetition = list => {
+	let obj = {}
+	let arr = []
+	list.forEach((l, idx) => {
+		let c = _.clone(l)
+		let key = c.version + '-' + c.brand
+		if (obj[key]) {
+			obj[key].number += Number(c.number)
+		} else {
+			c.number = Number(c.number)
+			obj[key] = c
+			arr.push(obj[key])
+		}
+	})
+	return arr
+}
+
 router.get('/getList', (req, res, next) => {
 	var query = req.query
 	PayOrderModel.find({}).sort({
@@ -145,7 +195,7 @@ router.post('/add', async (req, res, next) => {
 	let saveOK = await saveOrder(req.body, list, res)
 	if (!saveOK) return
 	//更新库存
-	let isOK = await InventoryModel.add(list, res)
+	let isOK = await InventoryModel.add(list)
 	if (!isOK)
 		return res.ef('入库单创建失败')
 	res.sf({}, '入库单创建成功')
@@ -156,12 +206,18 @@ router.post('/edit', async (req, res, next) => {
 		return res.ef('型号内容不能为空，入库单修改失败')
 	let order = await getOrder(req.body, res)
 	let oldList = await getList(order, res)
-	//删除入库单
-	await order.remove()
+
+	let result = await checkFn(oldList)
+	if (!result.status)
+		return res.ef(result.message)
+
 	//删除库存
 	let delInventory = await InventoryModel.del(oldList)
 	if (!delInventory)
-		return res.ef('入库单修改失败')
+		return res.ef('库存不足')
+
+	//删除入库单
+	await order.remove()
 	//删除入库单详情
 	let delStore = await delInStore(oldList)
 	if (!delStore)
@@ -174,10 +230,30 @@ router.post('/edit', async (req, res, next) => {
 	let saveOK = await saveOrder(req.body, list, res)
 	if (!saveOK) return
 	//更新库存
-	let isOK = InventoryModel.add(list, res)
+	let isOK = InventoryModel.add(list)
 	if (!isOK)
 		return res.ef('入库单修改失败')
 	res.sf({}, '入库单修改成功')
+})
+
+router.post('/delete', async (req, res, next) => {
+	let order = await getOrder(req.body, res)
+	let oldList = await getList(order, res)
+
+	let result = await checkFn(oldList)
+	if (!result.status)
+		return res.ef(result.message)
+	//删除库存
+	let delInventory = await InventoryModel.del(oldList)
+	if (!delInventory)
+		return res.ef('入库单删除失败')
+	//删除入库单
+	await order.remove()
+	//删除入库单详情
+	let delStore = await delInStore(oldList)
+	if (!delStore)
+		return res.ef('入库单删除失败')
+	res.sf({}, '入库单删除成功')
 })
 
 module.exports = router

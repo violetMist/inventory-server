@@ -67,6 +67,7 @@ router.post('/edit', (req, res, next) => {
 				outsideDiameter: req.body.outsideDiameter,
 				width: req.body.width,
 				weight: req.body.weight,
+				type: req.body.type,
 				unit: req.body.unit
 			}
 		}).then(r => {

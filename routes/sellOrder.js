@@ -195,21 +195,53 @@ router.post('/add', async (req, res, next) => {
 	let saveOK = await saveOrder(req.body, list, res)
 	if (!saveOK) return
 	//更新库存
-	let isOK = await InventoryModel.del(list, res)
+	let isOK = await InventoryModel.del(list)
 	if (!isOK)
 		return res.ef('出库单创建失败')
 	res.sf({}, '出库单创建成功')
 })
 
-router.post('/delete', async (req, res, next) => {
+router.post('/edit', async (req, res, next) => {
 	let order = await getOrder(req.body, res)
 	let oldList = await getList(order, res)
-	//删除入库单
-	await order.remove()
 	//添加库存
 	let delInventory = await InventoryModel.add(oldList)
 	if (!delInventory)
+		return res.ef('添加库存失败')
+	let result = await checkFn(req)
+	if (!result.status) {
+		await InventoryModel.del(oldList)
+		return res.ef(result.message)
+	}
+	//删除出库单
+	await order.remove()
+	//删除出库单详情
+	let delStore = await delInStore(oldList)
+	if (!delStore)
 		return res.ef('出库单删除失败')
+
+	//创建出库单详情
+	let list = await insertOutStore(req.body, res)
+	if (!list.length) return
+	//创建出库单
+	let saveOK = await saveOrder(req.body, list, res)
+	if (!saveOK) return
+	//更新库存
+	let isOK = await InventoryModel.del(list)
+	if (!isOK)
+		return res.ef('出库单创建失败')
+	res.sf({}, '出库单修改成功')
+})
+
+router.post('/delete', async (req, res, next) => {
+	let order = await getOrder(req.body, res)
+	let oldList = await getList(order, res)
+	//添加库存
+	let delInventory = await InventoryModel.add(oldList)
+	if (!delInventory)
+		return res.ef('添加库存失败')
+	//删除出库单
+	await order.remove()
 	//删除出库单详情
 	let delStore = await delInStore(oldList)
 	if (!delStore)

@@ -81,7 +81,49 @@ InventorySchema.statics.del = async function(list) {
 	return isOK
 }
 
-InventorySchema.statics.checkNumber = async function(list) {
+InventorySchema.statics.checkNumber = async function(list) { //删除验证
+	let status = 1
+	let data = null
+	const checkFn = async l => {
+		let one = await this.findOne({
+			version: l.version,
+			brand: l.brand,
+			store: l.store
+		}).populate([{
+			path: 'version'
+		}, {
+			path: 'brand'
+		}, {
+			path: 'store'
+		}]).catch(err => {
+			status = -1 //没有库存
+			data = l
+			console.log(err);
+		})
+		if (!one) {
+			data = l //没有库存
+			return status = -1
+		}
+		if (one.number < l.number) {
+			data = one //库存量不足
+			return status = 0
+		}
+	}
+	for (var i = 0; i < list.length; i++) {
+		if (status != 1)
+			return {
+				status: status,
+				data: data
+			}
+		await checkFn(list[i])
+	}
+	return {
+		status: status,
+		data: data
+	}
+}
+
+InventorySchema.statics.checkRepertory = async function(list) { //查看库存
 	let status = 1
 	let data = null
 	const checkFn = async l => {
