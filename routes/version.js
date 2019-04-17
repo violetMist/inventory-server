@@ -9,6 +9,8 @@ router.get('/getList', (req, res, next) => {
 		'_id': -1
 	}).then(r => {
 		let arr = r.filter(c => {
+			if (query.version)
+				return c.id == query.version
 			return (!query.type || c.type == query.type)
 		})
 		let hasPage = query.pageNo && query.pageSize
