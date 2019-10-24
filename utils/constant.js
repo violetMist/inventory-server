@@ -200,6 +200,9 @@ const constant = {
 	}, {
 		key: '28',
 		value: '润滑脂'
+	}, {
+		key: '29',
+		value: '紧定螺母'
 	}],
 	unitType: [{
 		key: '1',
