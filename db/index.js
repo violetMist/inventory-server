@@ -11,8 +11,7 @@ mongoose.connect('mongodb://localhost:27017/db', {
 	else {
 		console.dir('数据库🔗成功');
 		UserModel.findOne({
-			account: 'admin',
-			password: 123456,
+			account: 'admin'
 		}).then(r => {
 			if (!r) {
 				var admin = new UserModel({
